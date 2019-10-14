@@ -1,0 +1,100 @@
+version: '3.5'
+services:
+  gitlab:
+    image: 'gitlab/gitlab-ce:latest'
+    restart: always
+    container_name: gitlab-web
+    hostname: 'gitlab-web'
+    links:
+      - postgresql4gitlab:postgresql4gitlab
+      - postgresql4mattermost:postgresql4mattermost
+      - redis:redis
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        postgresql['enable'] = false
+        gitlab_rails['db_username'] = "gitlab"
+        gitlab_rails['db_password'] = "gitlab"
+        gitlab_rails['db_host'] = "postgresql4gitlab"
+        gitlab_rails['db_port'] = "5433"
+        gitlab_rails['db_database'] = "gitlabhq_production"
+        gitlab_rails['db_adapter'] = 'postgresql'
+        gitlab_rails['db_encoding'] = 'utf8'
+        redis['enable'] = true
+        gitlab_rails['redis_host'] = 'redis'
+        gitlab_rails['redis_port'] = '6379'
+        external_url 'http://localhost:30080'
+        gitlab_rails['gitlab_shell_ssh_port'] = 30022
+        mattermost['enable'] = true
+        mattermost_external_url "https://localhost:8065"
+        mattermost['database_name'] = "mattermost"
+        mattermost['service_address'] = "0.0.0.0"
+        mattermost['service_port'] = "8065"
+        mattermost['sql_driver_name'] = 'postgres'
+        mattermost['sql_data_source'] = "postgres://mattermost:mattermost@postgresql4mattermost/mattermost?sslmode=disable&connect_timeout=10"
+        mattermost['sql_data_source_replicas'] = []
+        mattermost['gitlab_enable'] = true
+        mattermost['gitlab_id'] = "a7914de77cb9225072b0be00777c91110aca5470544bd815e480175d0b4f45b6"
+        mattermost['gitlab_secret'] = "d3d5a0d8e896434d73f3ee399a89ee53c9bba3e184a5d11897d058d1c03dee39"
+        mattermost['email_enable_sign_up_with_email'] = false
+        mattermost_nginx['enable'] = false
+    ports:
+      # both ports must match the port from external_url above
+      - "30080:30080"
+      # the mapped port must match ssh_port specified above.
+      - "30022:22"
+      - "8065:8065"
+  # the following are hints on what volumes to mount if you want to persist data
+    volumes:
+      - gitlab-config:/etc/gitlab:rw
+      - gitlab-logs:/var/log/gitlab:rw
+      - gitlab-data:/var/opt/gitlab:rw
+    networks:
+      - gitlab-network
+      
+  postgresql4gitlab:
+    container_name: postgresql4gitlab
+    restart: always
+    build:
+      context: ./docker-postgresql-12-alpine-listening-on-port-5433/
+    environment:
+      - POSTGRES_USER=gitlab
+      - POSTGRES_PASSWORD=gitlab
+      - POSTGRES_DB=gitlabhq_production
+  # the following are hints on what volumes to mount if you want to persist data
+    volumes:
+      - pg-data:/var/lib/postgresql:rw
+    networks:
+      - gitlab-network
+
+  postgresql4mattermost:
+    container_name: postgresql4mattermost
+    restart: always
+    image: postgres:12-alpine
+    environment:
+      - POSTGRES_USER=mattermost
+      - POSTGRES_PASSWORD=mattermost
+      - POSTGRES_DB=mattermost
+  # the following are hints on what volumes to mount if you want to persist data
+    volumes:
+      - pg-data2:/var/lib/postgresql:rw
+    networks:
+      - gitlab-network
+  
+  redis:
+    container_name: redis
+    restart: always
+    image: redis:alpine3.10
+    networks:
+      - gitlab-network
+    
+networks:
+  gitlab-network:
+    
+volumes:
+  gitlab-config:
+  gitlab-logs:
+  gitlab-data:
+  pg-data:
+  pg-data2:
+  
+
