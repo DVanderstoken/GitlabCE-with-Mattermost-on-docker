@@ -1,4 +1,4 @@
-Premi�re ex�cution avec
+Première exécution avec
 
 ```
     mattermost['gitlab_enable'] = false
@@ -6,7 +6,7 @@ Premi�re ex�cution avec
     # mattermost['gitlab_secret'] = "644cd113afa5ff1c64a218ad8618cfc698407eee0b9e669cca71ffa94c5abee0"
 ```
 
-Se connecter � Gitlab (root/ � d�finir), puis aller dans Settings --> Application et cr�er Mattermost avec 
+Se connecter à Gitlab (root/ à définir), puis aller dans Settings --> Application et créer Mattermost avec 
 ```
     http://localhost:8065/signup/gitlab/complete
     http://localhost:8065/login/gitlab/complete 
@@ -14,19 +14,19 @@ Se connecter � Gitlab (root/ � d�finir), puis aller dans Settings --> Appl
 
 A vérifier s'il faut cocher api dans les scopes.
 
-R�cup�rer :
+Récupérer :
 - l'application ID, et
 - le Secret
-Pour mettre � jour le fichier docker-compose.yml :
+Pour mettre à jour le fichier docker-compose.yml :
 ```
     mattermost['gitlab_enable'] = true
     # mattermost['gitlab_id'] = "{ApplicationID}"
     # mattermost['gitlab_secret'] = "{Secret}"
 ```	
 
-Il subsiste un probl�me de droit pour Mattermost (cf. https://gitlab.com/gitlab-org/omnibus-gitlab/issues/4548) :
+Il subsiste un problème de droit pour Mattermost (cf. https://gitlab.com/gitlab-org/omnibus-gitlab/issues/4548) :
 
-Se connecter au container Gitlab-web et ex�cuter le script suivant : 
+Se connecter au container Gitlab-web et exécuter le script suivant : 
 
 ```
 chown -R mattermost:mattermost /opt/gitlab/embedded/service/mattermost/client/*
