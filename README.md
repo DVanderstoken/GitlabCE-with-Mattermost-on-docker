@@ -17,6 +17,7 @@ A vérifier s'il faut cocher api dans les scopes.
 Récupérer :
 - l'application ID, et
 - le Secret
+
 Pour mettre à jour le fichier docker-compose.yml :
 ```
     mattermost['gitlab_enable'] = true
